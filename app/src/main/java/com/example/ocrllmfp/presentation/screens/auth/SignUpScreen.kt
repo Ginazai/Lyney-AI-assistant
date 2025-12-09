@@ -2,6 +2,8 @@ package com.example.ocrllmfp.presentation.screens.auth
 
 import androidx.compose.animation.*
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -11,14 +13,15 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
-import com.example.ocrllmfp.presentation.viewmodel.MainViewModel  // ← Corregido
-import com.example.ocrllmfp.ui.components.*                      // ← Corregido
+import com.example.ocrllmfp.presentation.viewmodel.MainViewModel
+import com.example.ocrllmfp.ui.components.*
 
 @Composable
 fun SignUpScreen(
     viewModel: MainViewModel,
     onNavigateToLogin: () -> Unit
 ) {
+    val scrollState = rememberScrollState()
     var name by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -37,24 +40,31 @@ fun SignUpScreen(
 
     Box(modifier = Modifier.fillMaxSize()) {
         GradientBackground()
-
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            Spacer(modifier = Modifier.weight(1f))
+
             Text(
                 text = "Crear Cuenta",
                 style = MaterialTheme.typography.displayLarge,
                 color = MaterialTheme.colorScheme.onBackground
             )
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(5.dp))
 
             Text(
-                text = "Únete y empieza a analizar",
+                text = "Únete para empezar a aprender!",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onBackground.copy(alpha = 0.7f)
             )
@@ -62,7 +72,8 @@ fun SignUpScreen(
             Spacer(modifier = Modifier.height(48.dp))
 
             GlassCard(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
             ) {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
@@ -126,7 +137,9 @@ fun SignUpScreen(
                             Icon(Icons.Default.Lock, contentDescription = null)
                         },
                         trailingIcon = {
-                            IconButton(onClick = { confirmPasswordVisible = !confirmPasswordVisible }) {
+                            IconButton(onClick = {
+                                confirmPasswordVisible = !confirmPasswordVisible
+                            }) {
                                 Icon(
                                     if (confirmPasswordVisible) Icons.Default.Visibility
                                     else Icons.Default.VisibilityOff,
@@ -182,5 +195,6 @@ fun SignUpScreen(
                 }
             }
         }
+    }
     }
 }

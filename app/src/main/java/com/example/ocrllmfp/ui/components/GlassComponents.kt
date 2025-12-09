@@ -19,7 +19,7 @@ fun GlassCard(
     modifier: Modifier = Modifier,
     cornerRadius: Dp = 24.dp,
     borderWidth: Dp = 1.dp,
-    backgroundColor: Color = MaterialTheme.colorScheme.surface.copy(alpha = 0.2f),
+    backgroundColor: Color = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f),
     borderColor: Color = Color.White.copy(alpha = 0.2f),
     content: @Composable BoxScope.() -> Unit
 ) {

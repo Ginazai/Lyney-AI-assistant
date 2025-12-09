@@ -19,7 +19,7 @@ private val md_theme_light_onBackground = Color(0xFF1A1A1A)
 private val md_theme_light_onSurface = Color(0xFF1A1A1A)
 
 // Dark Theme Colors
-private val md_theme_dark_primary = Color(0xFFBB86FC)
+private val md_theme_dark_primary = Color(0xFF800000)
 private val md_theme_dark_background = Color(0xFF0A0A0A)
 private val md_theme_dark_surface = Color(0xFF1E1E1E)
 private val md_theme_dark_onPrimary = Color.Black

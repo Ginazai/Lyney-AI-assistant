@@ -15,6 +15,7 @@ import com.example.ocrllmfp.presentation.viewmodel.MainViewModel
 import com.example.ocrllmfp.presentation.viewmodel.ProcessingStage
 import com.example.ocrllmfp.ui.components.*
 import dev.jeziellago.compose.markdowntext.MarkdownText  // ← Import
+import dev.jeziellago.compose.markdowntext.MarkdownText  // ← Import
 
 @Composable
 fun ResultScreen(
