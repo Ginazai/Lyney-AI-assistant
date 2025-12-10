@@ -37,7 +37,22 @@ fun AppNavigation(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    val startDestination = if (uiState.isAuthenticated) Screen.Home.route else Screen.Login.route
+    // Mostrar loading mientras verifica sesión
+    if (uiState.isCheckingSession) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+        return
+    }
+
+    val startDestination = if (uiState.isAuthenticated) {
+        Screen.Home.route
+    } else {
+        Screen.Login.route
+    }
 
     NavHost(
         navController = navController,

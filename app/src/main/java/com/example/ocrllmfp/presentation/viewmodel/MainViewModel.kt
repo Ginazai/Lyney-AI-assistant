@@ -31,24 +31,29 @@ class MainViewModel(
 
     private fun checkExistingSession() {
         viewModelScope.launch {
-            _uiState.update { it.copy(isLoading = true) }
+            _uiState.update { it.copy(isCheckingSession = true) }
+
+            // Dar tiempo a Supabase para cargar la sesión del storage
+            kotlinx.coroutines.delay(500)
 
             val result = authRepository.refreshSession()
 
             result.onSuccess { user ->
+                android.util.Log.d("MainViewModel", "Sesión restaurada: ${user.id}")
                 _uiState.update {
                     it.copy(
-                        isLoading = false,
+                        isCheckingSession = false,
                         isAuthenticated = true,
                         currentUser = user
                     )
                 }
                 loadUser()
-                loadUserTheme(user.id) // ← Cargar tema al iniciar
-            }.onFailure {
+                loadUserTheme(user.id)
+            }.onFailure { error ->
+                android.util.Log.d("MainViewModel", "No hay sesión: ${error.message}")
                 _uiState.update {
                     it.copy(
-                        isLoading = false,
+                        isCheckingSession = false,
                         isAuthenticated = false
                     )
                 }
@@ -85,6 +90,7 @@ class MainViewModel(
                     try {
                         val theme = AppTheme.valueOf(profile.theme)
                         _uiState.update { it.copy(currentTheme = theme) }
+                        android.util.Log.d("MainViewModel", "Tema cargado: $theme")
                     } catch (e: Exception) {
                         android.util.Log.e("MainViewModel", "Tema inválido: ${profile.theme}")
                     }
@@ -98,6 +104,7 @@ class MainViewModel(
 
             authRepository.signIn(email, password)
                 .onSuccess { user ->
+                    android.util.Log.d("MainViewModel", "Login exitoso: ${user.id}")
                     _uiState.update {
                         it.copy(
                             isAuthenticated = true,
@@ -105,9 +112,10 @@ class MainViewModel(
                         )
                     }
                     loadUser()
-                    loadUserTheme(user.id) // ← Cargar tema después del login
+                    loadUserTheme(user.id)
                 }
                 .onFailure { error ->
+                    android.util.Log.e("MainViewModel", "Error login: ${error.message}")
                     _uiState.update {
                         it.copy(
                             isLoading = false,
@@ -124,6 +132,7 @@ class MainViewModel(
 
             authRepository.signUp(email, password, name)
                 .onSuccess { user ->
+                    android.util.Log.d("MainViewModel", "Registro exitoso: ${user.id}")
                     _uiState.update {
                         it.copy(
                             isAuthenticated = true,
@@ -131,9 +140,9 @@ class MainViewModel(
                             userName = name
                         )
                     }
-                    // Al registrarse, el tema por defecto ya es DARK
                 }
                 .onFailure { error ->
+                    android.util.Log.e("MainViewModel", "Error registro: ${error.message}")
                     _uiState.update {
                         it.copy(
                             isLoading = false,
@@ -144,26 +153,28 @@ class MainViewModel(
         }
     }
 
+    fun signOut() {
+        viewModelScope.launch {
+            authRepository.signOut()
+            android.util.Log.d("MainViewModel", "Sesión cerrada")
+            _uiState.update { MainUiState() }
+        }
+    }
+
     fun changeTheme(theme: AppTheme) {
         viewModelScope.launch {
-            // Actualizar UI inmediatamente
             _uiState.update { it.copy(currentTheme = theme) }
 
-            // Guardar en Supabase
             val user = authRepository.getCurrentUser()
             user?.let {
                 authRepository.updateUserTheme(it.id, theme.name)
+                    .onSuccess {
+                        android.util.Log.d("MainViewModel", "Tema guardado: ${theme.name}")
+                    }
                     .onFailure { error ->
                         android.util.Log.e("MainViewModel", "Error guardando tema: ${error.message}")
                     }
             }
-        }
-    }
-
-    fun signOut() {
-        viewModelScope.launch {
-            authRepository.signOut()
-            _uiState.update { MainUiState() }
         }
     }
 
@@ -289,6 +300,7 @@ data class MainUiState(
     val currentUser: Any? = null,
     val currentTheme: AppTheme = AppTheme.DARK,
     val isLoading: Boolean = false,
+    val isCheckingSession: Boolean = false,
     val isProcessing: Boolean = false,
     val processingStage: ProcessingStage = ProcessingStage.IDLE,
     val capturedImage: Bitmap? = null,

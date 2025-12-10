@@ -4,6 +4,7 @@ package com.example.ocrllmfp.data.remote
 
 import android.content.Context
 import com.example.ocrllmfp.BuildConfig
+import com.example.ocrllmfp.data.local.datastore.AndroidSessionManager
 import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.gotrue.Auth
@@ -22,10 +23,13 @@ object SupabaseClientProvider {
                 supabaseKey = BuildConfig.SUPABASE_KEY
             ) {
                 install(Auth) {
-                    // Habilitar auto-refresh de tokens
+                    // Usar SessionManager personalizado
+                    sessionManager = AndroidSessionManager(context.applicationContext)
+
+                    // Configuración de sesión
+                    alwaysAutoRefresh = true
                     autoLoadFromStorage = true
                     autoSaveToStorage = true
-                    alwaysAutoRefresh = true
                 }
                 install(Postgrest)
             }
@@ -36,6 +40,7 @@ object SupabaseClientProvider {
     fun auth(context: Context) = getClient(context).auth
     fun database(context: Context) = getClient(context).postgrest
 }
+
 
 @kotlinx.serialization.Serializable
 data class UserProfile(
