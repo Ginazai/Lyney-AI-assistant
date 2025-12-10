@@ -17,28 +17,49 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
 
 class AndroidSessionManager(
     private val context: Context,
-    private val json: Json = Json // You can inject this or create a default instance
+    private val json: Json = Json {
+        ignoreUnknownKeys = true
+        encodeDefaults = true
+    }
 ) : SessionManager {
 
     private val sessionKey = stringPreferencesKey("supabase_session")
 
     override suspend fun deleteSession() {
-        context.dataStore.edit { preferences ->
-            preferences.remove(sessionKey)
+        try {
+            context.dataStore.edit { preferences ->
+                preferences.remove(sessionKey)
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("SessionManager", "Error deleting session: ${e.message}")
+            throw e
         }
     }
 
     override suspend fun loadSession(): UserSession? {
-        val jsonString = context.dataStore.data.map { preferences ->
-            preferences[sessionKey]
-        }.first()
-        return jsonString?.let { json.decodeFromString(it) }
+        return try {
+            val jsonString = context.dataStore.data.map { preferences ->
+                preferences[sessionKey]
+            }.first()
+
+            jsonString?.let {
+                json.decodeFromString<UserSession>(it)
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("SessionManager", "Error loading session: ${e.message}")
+            null
+        }
     }
 
     override suspend fun saveSession(session: UserSession) {
-        val jsonString = json.encodeToString(session)
-        context.dataStore.edit { preferences ->
-            preferences[sessionKey] = jsonString
+        try {
+            val jsonString = json.encodeToString(session)
+            context.dataStore.edit { preferences ->
+                preferences[sessionKey] = jsonString
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("SessionManager", "Error saving session: ${e.message}")
+            throw e
         }
     }
 }

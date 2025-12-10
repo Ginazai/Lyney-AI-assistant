@@ -251,8 +251,8 @@ fun getThemeName(theme: AppTheme): String {
 
 fun getThemeColor(theme: AppTheme): Color {
     return when (theme) {
-        AppTheme.LIGHT -> Color(0xFFEEEEEE)
-        AppTheme.DARK -> Color(0xFF262626)
+        AppTheme.LIGHT -> Color(0xFF6200EE)
+        AppTheme.DARK -> Color(0xFFBB86FC)
         AppTheme.BLUE -> Color(0xFF00B4D8)
         AppTheme.GREEN -> Color(0xFF40916C)
         AppTheme.PURPLE -> Color(0xFF9D4EDD)

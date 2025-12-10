@@ -72,6 +72,7 @@ class MainViewModel(
                         userName = profile.name
                     )
                 }
+                loadUserTheme(profile.id)
             }.onFailure {
                 _uiState.update {
                     it.copy(
@@ -163,16 +164,16 @@ class MainViewModel(
 
     fun changeTheme(theme: AppTheme) {
         viewModelScope.launch {
+            // Actualizar UI inmediatamente
             _uiState.update { it.copy(currentTheme = theme) }
 
+            // Guardar en Supabase en background
             val user = authRepository.getCurrentUser()
             user?.let {
                 authRepository.updateUserTheme(it.id, theme.name)
-                    .onSuccess {
-                        android.util.Log.d("MainViewModel", "Tema guardado: ${theme.name}")
-                    }
                     .onFailure { error ->
                         android.util.Log.e("MainViewModel", "Error guardando tema: ${error.message}")
+                        // Opcional: mostrar toast o mensaje al usuario
                     }
             }
         }
@@ -186,7 +187,7 @@ class MainViewModel(
             AppTheme.GREEN -> AppTheme.PURPLE
             AppTheme.PURPLE -> AppTheme.LIGHT
         }
-        changeTheme(nextTheme)
+        changeTheme(nextTheme) // ← Usa changeTheme que guarda en Supabase
     }
 
     fun processImage(bitmap: Bitmap) {

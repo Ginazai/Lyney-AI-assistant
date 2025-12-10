@@ -2,17 +2,20 @@ package com.example.ocrllmfp.data.repository
 
 import android.content.Context
 import com.example.ocrllmfp.data.remote.SupabaseClientProvider
-import com.example.ocrllmfp.data.remote.UserProfile
+import com.example.ocrllmfp.data.model.UserProfile
+import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.gotrue.user.UserInfo
 import io.github.jan.supabase.gotrue.providers.builtin.Email
 import io.github.jan.supabase.postgrest.from
+import io.github.jan.supabase.postgrest.postgrest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 class AuthRepository(private val context: Context) {
 
-    private val auth get() = SupabaseClientProvider.auth(context)
-    private val database get() = SupabaseClientProvider.database(context)
+    private val supabaseClient = SupabaseClientProvider.getClient(context.applicationContext)
+    private val auth = supabaseClient.auth
+    private val database = supabaseClient.postgrest
 
     suspend fun isUserLoggedIn(): Boolean = withContext(Dispatchers.IO) {
         try {
@@ -24,19 +27,13 @@ class AuthRepository(private val context: Context) {
 
     suspend fun refreshSession(): Result<UserInfo> = withContext(Dispatchers.IO) {
         try {
-            // Supabase automáticamente refresca la sesión si es válida
-            auth.sessionStatus.value.let { status ->
-                when (status) {
-                    is io.github.jan.supabase.gotrue.SessionStatus.Authenticated -> {
-                        val user = auth.currentUserOrNull()
-                        if (user != null) {
-                            Result.success(user)
-                        } else {
-                            Result.failure(Exception("No hay sesión activa"))
-                        }
-                    }
-                    else -> Result.failure(Exception("Sesión no autenticada"))
-                }
+            // Forzar refresh de sesión
+            auth.refreshCurrentSession()
+            val user = auth.currentUserOrNull()
+            if (user != null) {
+                Result.success(user)
+            } else {
+                Result.failure(Exception("No hay sesión activa"))
             }
         } catch (e: Exception) {
             Result.failure(e)
