@@ -62,7 +62,8 @@ fun LoginScreen(
             Spacer(modifier = Modifier.height(48.dp))
 
             GlassCard(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier
+                    .fillMaxWidth()
             ) {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
@@ -91,6 +92,10 @@ fun LoginScreen(
                         modifier = Modifier.fillMaxWidth(),
                         label = "Contraseña",
                         placeholder = "••••••••",
+                        visualTransformation = if (passwordVisible)  // ← Añadir
+                            VisualTransformation.None
+                        else
+                            PasswordVisualTransformation(),
                         leadingIcon = {
                             Icon(Icons.Default.Lock, contentDescription = null)
                         },

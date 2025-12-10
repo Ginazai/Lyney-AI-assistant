@@ -13,6 +13,28 @@ class AuthRepository {
     private val auth = SupabaseClient.auth
     private val database = SupabaseClient.database
 
+    suspend fun isUserLoggedIn(): Boolean = withContext(Dispatchers.IO) {
+        try {
+            auth.currentSessionOrNull() != null
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    suspend fun refreshSession(): Result<UserInfo> = withContext(Dispatchers.IO) {
+        try {
+            // Supabase automatically refreshes the session if valid
+            val user = auth.currentUserOrNull()
+            if (user != null) {
+                Result.success(user)
+            } else {
+                Result.failure(Exception("No hay sesión activa"))
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     suspend fun signUp(
         email: String,
         password: String,

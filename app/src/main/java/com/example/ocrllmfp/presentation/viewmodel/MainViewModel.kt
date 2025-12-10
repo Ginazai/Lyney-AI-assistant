@@ -26,8 +26,34 @@ class MainViewModel(
     val uiState: StateFlow<MainUiState> = _uiState.asStateFlow()
 
     init {
+        checkExistingSession()
         checkAuthStatus()
         loadUser()
+    }
+
+    private fun checkExistingSession() {
+        viewModelScope.launch {
+            _uiState.update { it.copy(isLoading = true) }
+
+            val result = authRepository.refreshSession()
+
+            result.onSuccess { user ->
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        isAuthenticated = true,
+                        currentUser = user
+                    )
+                }
+            }.onFailure {
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        isAuthenticated = false
+                    )
+                }
+            }
+        }
     }
 
     private fun checkAuthStatus() {

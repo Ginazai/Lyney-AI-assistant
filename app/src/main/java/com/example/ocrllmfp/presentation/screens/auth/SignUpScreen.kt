@@ -43,15 +43,10 @@ fun SignUpScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .verticalScroll(scrollState),
+                .verticalScroll(scrollState)
+                .padding(24.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
-        ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Spacer(modifier = Modifier.weight(1f))
 
@@ -113,6 +108,10 @@ fun SignUpScreen(
                         modifier = Modifier.fillMaxWidth(),
                         label = "Contraseña",
                         placeholder = "Mínimo 6 caracteres",
+                        visualTransformation = if (confirmPasswordVisible)
+                            VisualTransformation.None
+                        else
+                            PasswordVisualTransformation(),
                         leadingIcon = {
                             Icon(Icons.Default.Lock, contentDescription = null)
                         },
@@ -133,6 +132,10 @@ fun SignUpScreen(
                         modifier = Modifier.fillMaxWidth(),
                         label = "Confirmar Contraseña",
                         placeholder = "Repite tu contraseña",
+                        visualTransformation = if (confirmPasswordVisible)
+                            VisualTransformation.None
+                        else
+                            PasswordVisualTransformation(),
                         leadingIcon = {
                             Icon(Icons.Default.Lock, contentDescription = null)
                         },
@@ -194,7 +197,7 @@ fun SignUpScreen(
                     }
                 }
             }
+
         }
-    }
     }
 }

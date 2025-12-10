@@ -8,9 +8,12 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
@@ -19,17 +22,36 @@ fun GlassCard(
     modifier: Modifier = Modifier,
     cornerRadius: Dp = 24.dp,
     borderWidth: Dp = 1.dp,
-    backgroundColor: Color = MaterialTheme.colorScheme.surface.copy(alpha = 0.6f),
-    borderColor: Color = Color.White.copy(alpha = 0.2f),
+    backgroundColor: Color = MaterialTheme.colorScheme.surface.copy(alpha = 0.1f),
+    borderColor: Color = Color.White.copy(alpha = 0.18f),
+    shadowElevation: Dp = 15.dp,
     content: @Composable BoxScope.() -> Unit
 ) {
     Box(
         modifier = modifier
+            .shadow(
+                elevation = shadowElevation,
+                shape = RoundedCornerShape(cornerRadius),
+                ambientColor = Color.Black.copy(alpha = 0.1f),
+                spotColor = Color.Black.copy(alpha = 0.1f)
+            )
             .clip(RoundedCornerShape(cornerRadius))
-            .background(backgroundColor)
+            .background(
+                brush = Brush.linearGradient(
+                    colors = listOf(
+                        backgroundColor.copy(alpha = 0.15f),
+                        backgroundColor.copy(alpha = 0.05f)
+                    )
+                )
+            )
             .border(
                 width = borderWidth,
-                color = borderColor,
+                brush = Brush.verticalGradient(
+                    colors = listOf(
+                        borderColor.copy(alpha = 0.5f),
+                        borderColor.copy(alpha = 0.2f)
+                    )
+                ),
                 shape = RoundedCornerShape(cornerRadius)
             )
             .padding(24.dp),
@@ -49,7 +71,14 @@ fun GlassButton(
 ) {
     Button(
         onClick = onClick,
-        modifier = modifier.height(56.dp),
+        modifier = modifier
+            .height(56.dp)
+            .shadow(
+                elevation = if (enabled) 4.dp else 0.dp,
+                shape = RoundedCornerShape(cornerRadius),
+                ambientColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f),
+                spotColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+            ),
         enabled = enabled,
         colors = ButtonDefaults.buttonColors(
             containerColor = backgroundColor,
@@ -80,12 +109,19 @@ fun GlassTextField(
     leadingIcon: @Composable (() -> Unit)? = null,
     trailingIcon: @Composable (() -> Unit)? = null,
     singleLine: Boolean = true,
-    maxLines: Int = 1
+    maxLines: Int = 1,
+    visualTransformation: VisualTransformation = VisualTransformation.None
 ) {
     OutlinedTextField(
         value = value,
         onValueChange = onValueChange,
-        modifier = modifier,
+        modifier = modifier
+            .shadow(
+                elevation = 2.dp,
+                shape = RoundedCornerShape(16.dp),
+                ambientColor = Color.Black.copy(alpha = 0.05f),
+                spotColor = Color.Black.copy(alpha = 0.05f)
+            ),
         label = if (label.isNotEmpty()) {
             { Text(label) }
         } else null,
@@ -96,6 +132,7 @@ fun GlassTextField(
         trailingIcon = trailingIcon,
         singleLine = singleLine,
         maxLines = maxLines,
+        visualTransformation = visualTransformation,
         colors = OutlinedTextFieldDefaults.colors(
             focusedContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.1f),
             unfocusedContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.05f),
@@ -115,7 +152,8 @@ fun GlassLoader(
         modifier = modifier
             .fillMaxWidth()
             .padding(32.dp),
-        cornerRadius = 20.dp
+        cornerRadius = 20.dp,
+        shadowElevation = 12.dp
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,

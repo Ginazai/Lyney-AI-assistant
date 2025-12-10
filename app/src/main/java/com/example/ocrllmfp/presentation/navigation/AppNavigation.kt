@@ -2,9 +2,14 @@ package com.example.ocrllmfp.presentation.navigation
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -32,14 +37,10 @@ fun AppNavigation(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
-    val startDestination = if (uiState.isAuthenticated) {
-        Screen.Home.route
-    } else {
-        Screen.Login.route
-    }
+    val startDestination = if (uiState.isAuthenticated) Screen.Home.route else Screen.Login.route
 
     NavHost(
-        navController = navController,  // ← NO crear uno nuevo
+        navController = navController,
         startDestination = startDestination
     ) {
         composable(Screen.Login.route) {
