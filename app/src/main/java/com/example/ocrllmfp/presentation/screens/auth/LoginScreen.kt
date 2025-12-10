@@ -27,6 +27,17 @@ fun LoginScreen(
 
     val uiState by viewModel.uiState.collectAsState()
 
+    // Mostrar loader si está verificando sesión existente
+    if (uiState.isLoading && !uiState.isAuthenticated) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            CircularProgressIndicator()
+        }
+        return
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         GradientBackground()
 

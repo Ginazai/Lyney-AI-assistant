@@ -17,7 +17,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.compose.rememberNavController
 import com.example.ocrllmfp.presentation.navigation.AppNavigation
 import com.example.ocrllmfp.presentation.viewmodel.MainViewModel
-import com.example.ocrllmfp.ui.theme.OCRAIATheme
+import com.example.ocrllmfp.ui.theme.Theme
 
 class MainActivity : ComponentActivity() {
 
@@ -46,7 +46,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val uiState by viewModel.uiState.collectAsState()
 
-            OCRAIATheme(
+            Theme(
                 theme = uiState.currentTheme,
                 useDynamicColor = false
             ) {

@@ -91,6 +91,9 @@ dependencies {
     implementation("io.github.jan-tennert.supabase:postgrest-kt:2.1.0")
     implementation("io.github.jan-tennert.supabase:gotrue-kt:2.1.0")
 
+    // DataStore para persistir tokens
+    implementation("androidx.datastore:datastore-preferences:1.0.0")
+
     // Ktor (requerido por Supabase)
     implementation("io.ktor:ktor-client-android:2.3.7")
     implementation("io.ktor:ktor-client-core:2.3.7")

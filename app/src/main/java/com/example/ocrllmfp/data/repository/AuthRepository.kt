@@ -1,17 +1,18 @@
 package com.example.ocrllmfp.data.repository
 
-import com.example.ocrllmfp.data.remote.SupabaseClient
+import android.content.Context
+import com.example.ocrllmfp.data.remote.SupabaseClientProvider
 import com.example.ocrllmfp.data.remote.UserProfile
 import io.github.jan.supabase.gotrue.user.UserInfo
+import io.github.jan.supabase.gotrue.providers.builtin.Email
 import io.github.jan.supabase.postgrest.from
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import io.github.jan.supabase.gotrue.providers.builtin.Email
 
-class AuthRepository {
+class AuthRepository(private val context: Context) {
 
-    private val auth = SupabaseClient.auth
-    private val database = SupabaseClient.database
+    private val auth get() = SupabaseClientProvider.auth(context)
+    private val database get() = SupabaseClientProvider.database(context)
 
     suspend fun isUserLoggedIn(): Boolean = withContext(Dispatchers.IO) {
         try {
@@ -23,12 +24,19 @@ class AuthRepository {
 
     suspend fun refreshSession(): Result<UserInfo> = withContext(Dispatchers.IO) {
         try {
-            // Supabase automatically refreshes the session if valid
-            val user = auth.currentUserOrNull()
-            if (user != null) {
-                Result.success(user)
-            } else {
-                Result.failure(Exception("No hay sesión activa"))
+            // Supabase automáticamente refresca la sesión si es válida
+            auth.sessionStatus.value.let { status ->
+                when (status) {
+                    is io.github.jan.supabase.gotrue.SessionStatus.Authenticated -> {
+                        val user = auth.currentUserOrNull()
+                        if (user != null) {
+                            Result.success(user)
+                        } else {
+                            Result.failure(Exception("No hay sesión activa"))
+                        }
+                    }
+                    else -> Result.failure(Exception("Sesión no autenticada"))
+                }
             }
         } catch (e: Exception) {
             Result.failure(e)
@@ -91,11 +99,9 @@ class AuthRepository {
 
     suspend fun getUserProfile(): Result<UserProfile> = withContext(Dispatchers.IO) {
         try {
-            // Obtener el usuario actual desde supabase auth
             val user = auth.currentSessionOrNull()?.user
                 ?: return@withContext Result.failure(Exception("Usuario no autenticado"))
 
-            // Consulta a la tabla
             val profile = database.from("user_profiles")
                 .select {
                     filter {
@@ -110,7 +116,6 @@ class AuthRepository {
         }
     }
 
-
     suspend fun updateUserTheme(userId: String, theme: String): Result<Unit> = withContext(Dispatchers.IO) {
         try {
             database.from("user_profiles")
@@ -123,7 +128,7 @@ class AuthRepository {
                 }
             Result.success(Unit)
         } catch (e: Exception) {
-            Result.failure(throw Exception("Ha ocurrido un error al actualizar el tema: ${e}"))
+            Result.failure(Exception("Error al actualizar tema: ${e.message}"))
         }
     }
 
@@ -137,7 +142,7 @@ class AuthRepository {
             )
             database.from("user_profiles").insert(profile)
         } catch (e: Exception) {
-            // Log error pero no falla el signup
+            android.util.Log.e("AuthRepository", "Error creando perfil: ${e.message}")
         }
     }
 }

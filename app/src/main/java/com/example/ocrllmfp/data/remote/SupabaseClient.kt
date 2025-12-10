@@ -2,28 +2,39 @@
 
 package com.example.ocrllmfp.data.remote
 
+import android.content.Context
 import com.example.ocrllmfp.BuildConfig
+import io.github.jan.supabase.SupabaseClient
 import io.github.jan.supabase.createSupabaseClient
 import io.github.jan.supabase.gotrue.Auth
 import io.github.jan.supabase.gotrue.auth
 import io.github.jan.supabase.postgrest.Postgrest
 import io.github.jan.supabase.postgrest.postgrest
 
-object SupabaseClient {
+object SupabaseClientProvider {
 
-    private const val SUPABASE_URL = BuildConfig.SUPABASE_URL
-    private const val SUPABASE_KEY = BuildConfig.SUPABASE_KEY
+    private var _client: SupabaseClient? = null
 
-    val client = createSupabaseClient(
-        supabaseUrl = SUPABASE_URL,
-        supabaseKey = SUPABASE_KEY
-    ) {
-        install(Auth)
-        install(Postgrest)
+    fun getClient(context: Context): SupabaseClient {
+        if (_client == null) {
+            _client = createSupabaseClient(
+                supabaseUrl = BuildConfig.SUPABASE_URL,
+                supabaseKey = BuildConfig.SUPABASE_KEY
+            ) {
+                install(Auth) {
+                    // Habilitar auto-refresh de tokens
+                    autoLoadFromStorage = true
+                    autoSaveToStorage = true
+                    alwaysAutoRefresh = true
+                }
+                install(Postgrest)
+            }
+        }
+        return _client!!
     }
 
-    val auth = client.auth
-    val database = client.postgrest
+    fun auth(context: Context) = getClient(context).auth
+    fun database(context: Context) = getClient(context).postgrest
 }
 
 @kotlinx.serialization.Serializable

@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
 
 class MainViewModel(
     private val context: Context,
-    private val authRepository: AuthRepository = AuthRepository(),
+    private val authRepository: AuthRepository = AuthRepository(context),
     private val ocrManager: OCRManager = OCRManager(context),
     private val geminiService: GeminiService = GeminiService()
 ) : ViewModel() {
@@ -27,8 +27,6 @@ class MainViewModel(
 
     init {
         checkExistingSession()
-        checkAuthStatus()
-        loadUser()
     }
 
     private fun checkExistingSession() {
@@ -45,6 +43,8 @@ class MainViewModel(
                         currentUser = user
                     )
                 }
+                loadUser()
+                loadUserTheme(user.id) // ← Cargar tema al iniciar
             }.onFailure {
                 _uiState.update {
                     it.copy(
@@ -52,15 +52,6 @@ class MainViewModel(
                         isAuthenticated = false
                     )
                 }
-            }
-        }
-    }
-
-    private fun checkAuthStatus() {
-        viewModelScope.launch {
-            val user = authRepository.getCurrentUser()
-            _uiState.update {
-                it.copy(isAuthenticated = user != null)
             }
         }
     }
@@ -87,12 +78,26 @@ class MainViewModel(
         }
     }
 
+    private fun loadUserTheme(userId: String) {
+        viewModelScope.launch {
+            authRepository.getUserProfile()
+                .onSuccess { profile ->
+                    try {
+                        val theme = AppTheme.valueOf(profile.theme)
+                        _uiState.update { it.copy(currentTheme = theme) }
+                    } catch (e: Exception) {
+                        android.util.Log.e("MainViewModel", "Tema inválido: ${profile.theme}")
+                    }
+                }
+        }
+    }
+
     fun signIn(email: String, password: String) {
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, error = null) }
 
             authRepository.signIn(email, password)
-                .onSuccess {
+                .onSuccess { user ->
                     _uiState.update {
                         it.copy(
                             isAuthenticated = true,
@@ -100,6 +105,7 @@ class MainViewModel(
                         )
                     }
                     loadUser()
+                    loadUserTheme(user.id) // ← Cargar tema después del login
                 }
                 .onFailure { error ->
                     _uiState.update {
@@ -117,7 +123,7 @@ class MainViewModel(
             _uiState.update { it.copy(isLoading = true, error = null) }
 
             authRepository.signUp(email, password, name)
-                .onSuccess {
+                .onSuccess { user ->
                     _uiState.update {
                         it.copy(
                             isAuthenticated = true,
@@ -125,6 +131,7 @@ class MainViewModel(
                             userName = name
                         )
                     }
+                    // Al registrarse, el tema por defecto ya es DARK
                 }
                 .onFailure { error ->
                     _uiState.update {
@@ -137,15 +144,27 @@ class MainViewModel(
         }
     }
 
+    fun changeTheme(theme: AppTheme) {
+        viewModelScope.launch {
+            // Actualizar UI inmediatamente
+            _uiState.update { it.copy(currentTheme = theme) }
+
+            // Guardar en Supabase
+            val user = authRepository.getCurrentUser()
+            user?.let {
+                authRepository.updateUserTheme(it.id, theme.name)
+                    .onFailure { error ->
+                        android.util.Log.e("MainViewModel", "Error guardando tema: ${error.message}")
+                    }
+            }
+        }
+    }
+
     fun signOut() {
         viewModelScope.launch {
             authRepository.signOut()
             _uiState.update { MainUiState() }
         }
-    }
-
-    fun changeTheme(theme: AppTheme) {
-        _uiState.update { it.copy(currentTheme = theme) }
     }
 
     fun toggleTheme() {
