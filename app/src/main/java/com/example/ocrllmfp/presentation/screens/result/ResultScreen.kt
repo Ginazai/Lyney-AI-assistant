@@ -14,8 +14,7 @@ import androidx.compose.ui.unit.dp
 import com.example.ocrllmfp.presentation.viewmodel.MainViewModel
 import com.example.ocrllmfp.presentation.viewmodel.ProcessingStage
 import com.example.ocrllmfp.ui.components.*
-import dev.jeziellago.compose.markdowntext.MarkdownText  // ← Import
-import dev.jeziellago.compose.markdowntext.MarkdownText  // ← Import
+import dev.jeziellago.compose.markdowntext.MarkdownText
 
 @Composable
 fun ResultScreen(
@@ -137,7 +136,7 @@ fun ResultScreen(
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
                                     Text(
-                                        "📝 Texto Extraído",
+                                        "Texto Extraído",
                                         style = MaterialTheme.typography.titleMedium,
                                         color = MaterialTheme.colorScheme.primary
                                     )
@@ -171,7 +170,7 @@ fun ResultScreen(
                     ) {
                         Column {
                             Text(
-                                text = "🤖 Análisis IA",
+                                text = "Análisis IA",
                                 style = MaterialTheme.typography.titleLarge,
                                 color = MaterialTheme.colorScheme.primary
                             )

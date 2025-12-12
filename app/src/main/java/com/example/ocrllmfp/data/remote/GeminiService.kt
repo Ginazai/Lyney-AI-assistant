@@ -74,7 +74,7 @@ class GeminiService {
             """.trimIndent()
 
             else -> """
-                Eres un asistente inteligente que analiza texto extraído de imágenes.
+                Eres un asistente educativo inteligente que analiza texto extraído de imágenes.
                 Tu trabajo es:
                 1. Identificar el tipo de contenido (texto, código, matemáticas, tabla, etc.)
                 2. Proporcionar una explicación clara y útil
@@ -89,7 +89,17 @@ class GeminiService {
         }
 
         return """
-            $systemInstruction
+            Eres un asistente educativo inteligente que analiza texto extraído de imágenes.
+            Tu trabajo es:
+            1. Identificar el tipo de contenido (texto, código, matemáticas, tabla, etc.)
+            2. Proporcionar una explicación clara y útil
+            3. Organizar la información de manera legible
+            4. Sugerir acciones útiles basadas en el contenido
+            5. En caso de no poder identificar la naturaleza del contenido, informa de esto al usuario y solicita que intente nuevamente.
+            
+            Responde siempre en español y en formato Markdown para mejor legibilidad.
+            
+            Nota: el origen de código es OCR por lo que se espera esté desordenado.
             
             Texto extraído:
 ```

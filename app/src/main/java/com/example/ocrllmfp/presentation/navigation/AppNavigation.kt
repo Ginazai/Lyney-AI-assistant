@@ -32,7 +32,7 @@ sealed class Screen(val route: String) {
 
 @Composable
 fun AppNavigation(
-    navController: NavHostController,  // ← Usar el que viene como parámetro
+    navController: NavHostController,
     viewModel: MainViewModel
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -91,7 +91,7 @@ fun AppNavigation(
 
         composable(Screen.Camera.route) {
             CameraScreen(
-                onImageCaptured = { bitmap ->  // ← Pasar lambda, NO navController
+                onImageCaptured = { bitmap ->
                     viewModel.processImage(bitmap)
                     navController.navigate(Screen.Result.route) {
                         popUpTo(Screen.Camera.route) { inclusive = true }
